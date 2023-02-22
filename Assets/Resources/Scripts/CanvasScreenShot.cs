@@ -113,9 +113,9 @@ public class CanvasScreenShot : MonoBehaviour
 
         //////////////////////////////////////Finally Take ScreenShot///////////////////////////////
         yield return new WaitForEndOfFrame();
-        Texture2D screenImage = new Texture2D(Screen.width, Screen.height);
+        Texture2D screenImage = new Texture2D(2500, 3500);
         //Get Image from screen
-        screenImage.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+        screenImage.ReadPixels(new Rect(125, 125, 2500, 3500), 0, 0);
         screenImage.Apply();
 
         //Convert to png
