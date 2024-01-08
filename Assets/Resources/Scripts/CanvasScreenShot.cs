@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class CanvasScreenShot : MonoBehaviour
@@ -21,10 +22,50 @@ public class CanvasScreenShot : MonoBehaviour
     //Store all other canvas that will be disabled and re-anabled after screenShot
     private Canvas[] allOtherCanvas;
 
+
+    private FrontDisplay frontDisplay;
+
+    private void Start()
+    {
+        frontDisplay = GetComponentInChildren<FrontDisplay>();
+    }
+
     //takes Screenshot
     public void takeScreenShot(Canvas canvasPanel, SCREENSHOT_TYPE screenShotType = SCREENSHOT_TYPE.IMAGE_AND_TEXT, bool createNewInstance = true)
     {
         StartCoroutine(_takeScreenShot(canvasPanel, screenShotType, createNewInstance));
+    }
+
+    public void takeAllCards(List<List<Card>> lists, Canvas canvasPanel, SCREENSHOT_TYPE screenShotType = SCREENSHOT_TYPE.IMAGE_AND_TEXT, bool createNewInstance = true)
+    {
+        StartCoroutine(ShootAll(lists, canvasPanel, screenShotType, createNewInstance));
+    }
+
+    private IEnumerator ShootAll(List<List<Card>> _lists, Canvas canvasPanel, SCREENSHOT_TYPE screenShotType = SCREENSHOT_TYPE.IMAGE_AND_TEXT, bool createNewInstance = true)
+    {
+        int i = 0;
+        int max1 = _lists.Count;
+        while (i < max1)
+        {
+            List<Card> list = new List<Card>(_lists[i]);
+
+            int j = 0;
+            int max2 = list.Count;
+
+            while (j < max2)
+            {
+                Card card = list[j];
+
+                frontDisplay.DisplayCard(card);
+
+                yield return StartCoroutine(_takeScreenShot(canvasPanel, screenShotType, createNewInstance));
+
+                j++;
+            }
+
+            i++;
+            yield return null;
+        }
     }
 
     private IEnumerator _takeScreenShot(Canvas canvasPanel, SCREENSHOT_TYPE screenShotType = SCREENSHOT_TYPE.IMAGE_AND_TEXT, bool createNewInstance = true)
@@ -113,18 +154,18 @@ public class CanvasScreenShot : MonoBehaviour
 
         //////////////////////////////////////Finally Take ScreenShot///////////////////////////////
         yield return new WaitForEndOfFrame();
-        Texture2D screenImage = new Texture2D(2500, 3500);
+        Texture2D screenImage = new Texture2D(2250, 3250);
         //Get Image from screen
-        screenImage.ReadPixels(new Rect(125, 125, 2500, 3500), 0, 0);
+        screenImage.ReadPixels(new Rect(125, 125, 2250, 3250), 0, 0);
         screenImage.Apply();
 
         //Convert to png
         byte[] pngBytes = screenImage.EncodeToPNG();
 
-        /*FOR TESTING/DEBUGGING PURPOSES ONLY. COMMENT THIS
+        //FOR TESTING/DEBUGGING PURPOSES ONLY. COMMENT THIS
         string path = Application.persistentDataPath + "/CanvasScreenShot.png";
         System.IO.File.WriteAllBytes(path, pngBytes);
-        Debug.Log(path);*/
+        Debug.Log(path);
 
         //Notify functions that are subscribed to this event that picture is taken then pass in image bytes as png
         if (OnPictureTaken != null)
